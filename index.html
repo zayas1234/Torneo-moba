@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Registro de Escuadrón</title>
+  <style>
+    /* --- ESTILOS (CSS) --- */
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      position: relative; /* necesario para el overlay ::before */
+            /* Fondo: imagen desde la carpeta public (fallback a color oscuro) */
+            background-color: #121212;
+            /* La imagen está en public/WhatsApp Image 2026-02-02 at 8.17.04 PM.jpeg */
+            background-image: url("/WhatsApp%20Image%202026-02-02%20at%208.17.04%20PM.jpeg");
+      /* Reducida un poco: mantiene proporción automática */
+      background-size: 95% auto; /* 95% del ancho de la ventana */
+      background-position: center center;
+      background-repeat: no-repeat;
+      color: #ffffff;
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center; /* Alinea horizontalmente */
+      align-items: center;
+      padding: 20px; /* Un poco de espacio en móviles */
+      box-sizing: border-box;
+    }
+
+    .container {
+      /* Fondo del panel ligeramente translúcido para mejor contraste con la imagen */
+      background-color: rgba(30,30,30,0.92);
+      position: relative; /* para colocarse por encima del overlay */
+      z-index: 1;
+      padding: 2rem;
+      border-radius: 15px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+      width: 100%;
+      max-width: 450px;
+      border: 1px solid #333;
+    }
+
+    h2 {
+      text-align: center;
+      color: #00d2d3;
+      margin-bottom: 1.5rem;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+
+    .form-group {
+      margin-bottom: 1rem;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-size: 0.9rem;
+      color: #aaa;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 12px;
+      border-radius: 5px;
+      border: 1px solid #333;
+      background-color: #2c2c2c;
+      color: white;
+      box-sizing: border-box;
+      transition: border 0.3s ease;
+    }
+
+    input:focus, select:focus {
+      outline: none;
+      border-color: #00d2d3;
+      background-color: #383838;
+    }
+
+    /* Clase para cuando hay error (borde rojo) */
+    .input-error {
+      border-color: #ff4757 !important;
+      background-color: #2c0b0e !important;
+    }
+
+    .members-section {
+      background-color: #252525;
+      padding: 1rem;
+      border-radius: 8px;
+      margin-top: 1.5rem;
+      border: 1px dashed #444;
+    }
+
+    .members-section h3 {
+      font-size: 1rem;
+      margin-top: 0;
+      margin-bottom: 1rem;
+      color: #00d2d3;
+    }
+
+    /* Overlay oscuro sobre la imagen de fondo para mejorar legibilidad */
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0; /* top:0; right:0; bottom:0; left:0; */
+      background: rgba(0,0,0,0.45);
+      pointer-events: none;
+      z-index: 0; /* debajo del contenido (que tiene z-index:1) */
+    }
+
+    h2 {
+      text-shadow: 0 2px 6px rgba(0,0,0,0.6);
+    }
+
+    button {
+      width: 100%;
+      padding: 14px;
+      background-color: #00d2d3;
+      color: #121212;
+      border: none;
+      border-radius: 5px;
+      font-weight: bold;
+      font-size: 1rem;
+      cursor: pointer;
+      margin-top: 1.5rem;
+      transition: transform 0.2s, background 0.3s;
+    }
+
+    button:hover {
+      background-color: #00b5b6;
+      transform: translateY(-2px);
+    }
+
+    button:active {
+      transform: translateY(0);
+    }
+
+    #resultado {
+      margin-top: 1.5rem;
+      padding: 1rem;
+      background-color: #2ecc71; /* Verde éxito */
+      color: #000;
+      border-radius: 5px;
+      display: none;
+      animation: fadeIn 0.5s;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Modal de éxito */
+    #successModal {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0,0,0,0.4);
+      visibility: hidden;
+      opacity: 0;
+      transition: opacity 0.2s ease, visibility 0.2s;
+      z-index: 10000;
+    }
+
+    #successModal.visible {
+      visibility: visible;
+      opacity: 1;
+    }
+
+    #successModal .modal-box {
+      background: rgba(20,20,20,0.98);
+      color: #fff;
+      padding: 1.25rem 1.5rem;
+      border-radius: 10px;
+      max-width: 420px;
+      width: 90%;
+      text-align: center;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.6);
+    }
+
+    #successModal .modal-box h3 { color: #00d2d3; margin: 0 0 0.5rem 0 }
+
+    #successModal .modal-box button {
+      margin-top: 0.75rem;
+      padding: 0.6rem 1rem;
+      border-radius: 6px;
+      border: none;
+      background: #00d2d3;
+      color: #072022;
+      font-weight: 700;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h2>Registro de Squad</h2>
+    <form id="teamForm" action="https://api.web3forms.com/submit" method="POST" novalidate target="hidden_iframe">
+      <!-- Campos para Web3forms -->
+      <input type="hidden" name="access_key" value="72960a58-2d08-4695-8394-1c4e55b33972">
+      <input type="hidden" name="subject" value="Nuevo registro de squad">
+      <div class="form-group">
+        <label>Nombre Real</label>
+        <input type="text" id="nombre" name="nombre" placeholder="Tu nombre real" required>
+      </div>
+
+      <div class="form-group">
+        <label>Nombre del Líder del equipo</label>
+        <input type="text" id="ign" name="Nombre del Líder del equipo" placeholder="Ej: Vegueta777" required>
+      </div>
+
+      <div class="form-group">
+        <label>Estado</label>
+        <select id="estado" name="estado" required>
+          <option value="" disabled selected>Selecciona una opción...</option>
+          <option value="Aragua">Aragua</option>
+          <option value="Carabobo">Carabobo</option>
+          <option value="Caracas">Caracas</option>
+          <option value="La Guaira">La Guaira</option>
+        </select>
+      </div>
+
+      <div class="members-section">
+        <h3>Miembros del Equipo (4 Adicionales)</h3>
+        <div class="form-group">
+          <input type="text" class="member-input" name="miembros" placeholder="Nombre compañero 1">
+        </div>
+        <div class="form-group">
+          <input type="text" class="member-input" name="miembros" placeholder="Nombre compañero 2">
+        </div>
+        <div class="form-group">
+          <input type="text" class="member-input" name="miembros" placeholder="Nombre compañero 3">
+        </div>
+        <div class="form-group">
+          <input type="text" class="member-input" name="miembros" placeholder="Nombre compañero 4">
+        </div>
+      </div>
+
+      <button type="submit">Confirmar Equipo</button>
+    </form>
+
+    <div id="resultado"></div>
+  </div>
+
+  <!-- Iframe oculto para enviar el formulario sin navegar fuera de la página -->
+  <iframe name="hidden_iframe" id="hidden_iframe" style="display:none;"></iframe>
+
+  <!-- Modal de éxito -->
+  <div id="successModal" role="dialog" aria-hidden="true">
+    <div class="modal-box">
+      <h3>¡Felicidades!</h3>
+      <p>Tu equipo ha sido inscrito.</p>
+      <button id="closeModal">Aceptar</button>
+    </div>
+  </div>
+
+  <script>
+    // --- LÓGICA (JAVASCRIPT) ---
+        
+    (function(){
+      const form = document.getElementById('teamForm');
+      const iframe = document.getElementById('hidden_iframe');
+      const successModal = document.getElementById('successModal');
+      const closeModalBtn = document.getElementById('closeModal');
+      let formSubmitted = false;
+
+      // Mostrar modal cuando el iframe termine de cargar tras un submit
+      iframe.addEventListener('load', function() {
+        if (!formSubmitted) return;
+        formSubmitted = false;
+        // Mostrar modal
+        successModal.classList.add('visible');
+        successModal.setAttribute('aria-hidden', 'false');
+        // Limpiar formulario (opcional)
+        form.reset();
+      });
+
+      // Cerrar modal
+      closeModalBtn.addEventListener('click', function() {
+        successModal.classList.remove('visible');
+        successModal.setAttribute('aria-hidden', 'true');
+      });
+
+      form.addEventListener('submit', function(e) {
+        e.preventDefault(); // validamos manualmente y luego enviamos
+
+        // Variables
+        let hayError = false;
+        // Solo validar los campos visibles que forman parte del envío
+        const inputsRequeridos = document.querySelectorAll('#teamForm input[name], #teamForm select[name]');
+
+        // 1. Limpiar errores previos (quitar bordes rojos)
+        inputsRequeridos.forEach(input => input.classList.remove('input-error'));
+
+        // 2. Validar campos vacíos básicos
+        inputsRequeridos.forEach(input => {
+          // Ignorar campos ocultos de Formsubmit
+          if (input.type === 'hidden') return;
+          if (input.name && input.value.trim() === "") {
+            input.classList.add('input-error'); // Poner rojo
+            hayError = true;
+          }
+        });
+
+        // 3. Si hay error, detener y alertar
+        if (hayError) {
+          alert("Faltan datos por llenar. Revisa los campos en rojo.");
+          return;
+        }
+
+          // 4. Enviar el formulario al iframe oculto para evitar redirección
+          formSubmitted = true;
+          form.submit();
+      });
+    })();
+  </script>
+</body>
+</html>
